@@ -57,7 +57,6 @@ class OffboardControl : public rclcpp::Node
 public:
 	OffboardControl() : Node("offboard_control")
 	{
-
 		offboard_control_mode_publisher_ = this->create_publisher<OffboardControlMode>("/fmu/in/offboard_control_mode", 10);
 		trajectory_setpoint_publisher_ = this->create_publisher<TrajectorySetpoint>("/fmu/in/trajectory_setpoint", 10);
 		vehicle_command_publisher_ = this->create_publisher<VehicleCommand>("/fmu/in/vehicle_command", 10);
@@ -65,30 +64,24 @@ public:
 		offboard_setpoint_counter_ = 0;
 
 		auto timer_callback = [this]() -> void {
-			if(offboard_setpoint_counter_ < 10)
-			{	// Switch to manual mode
-				this->publish_vehicle_command(VehicleCommand::VEHICLE_CMD_DO_SET_MODE, 1, 1);
-
-				std::cout << "Set manual mode command send" << std::endl;
-			}
-
-			if (offboard_setpoint_counter_ == 20) {
-				// Change to Offboard mode after 10 setpoints
-				this->publish_vehicle_command(VehicleCommand::VEHICLE_CMD_DO_SET_MODE, 1, 6);
-				std::cout << "Starting offboard control node..." << std::endl;
-
-				// Arm the vehicle
-				this->arm();
-			}
-
-			// offboard_control_mode needs to be paired with trajectory_setpoint
+			
+			// Publish offboard control heartbeat
 			publish_offboard_control_mode();
 			publish_trajectory_setpoint();
 
-			// stop the counter after reaching 11
-			if (offboard_setpoint_counter_ < 21) {
+			if (offboard_setpoint_counter_ == 10) {
+				// Switch to Offboard mode after 10 setpoints (1 second)
+				this->publish_vehicle_command(VehicleCommand::VEHICLE_CMD_DO_SET_MODE, 1, 6);
+				RCLCPP_INFO(this->get_logger(), "Switching to offboard mode");
+			}
+
+			if (offboard_setpoint_counter_ == 20) {
+				// Arm after being in offboard mode for 1 second
+				this->arm();
+			}
+
+			if (offboard_setpoint_counter_ < 100) {
 				offboard_setpoint_counter_++;
-				std::cout << "Current counter:" << offboard_setpoint_counter_ << std::endl;
 			}
 		};
 		timer_ = this->create_wall_timer(100ms, timer_callback);
@@ -157,11 +150,16 @@ void OffboardControl::publish_offboard_control_mode()
 void OffboardControl::publish_trajectory_setpoint()
 {
 	TrajectorySetpoint msg{};
-	msg.velocity[0] = 1;
-	msg.velocity[1] = 1;
-	msg.velocity[2] = 1;
-	// msg.position = {0.0, 0.0, -5.0};
-	// msg.yaw = -3.14; // [-PI:PI]
+	msg.position[0] = std::nan(""); // Set to NaN to indicate we're not controlling position
+	msg.position[1] = std::nan("");
+	msg.position[2] = std::nan("");
+	
+	msg.velocity[0] = 0.0;  // North velocity (m/s)
+	msg.velocity[1] = 0.0;  // East velocity (m/s)
+	msg.velocity[2] = 0.0;  // Down velocity (m/s) - negative means UP!
+	
+	msg.yaw = 0.0; // Optional: set yaw angle
+	
 	msg.timestamp = this->get_clock()->now().nanoseconds() / 1000;
 	trajectory_setpoint_publisher_->publish(msg);
 }
