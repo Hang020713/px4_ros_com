@@ -65,7 +65,7 @@ public:
 		offboard_setpoint_counter_ = 0;
 
 		auto timer_callback = [this]() -> void {
-			if(offboard_setpoint_counter_ < 20)
+			if(offboard_setpoint_counter_ < 10)
 			{	// Switch to manual mode
 				this->publish_vehicle_command(VehicleCommand::VEHICLE_CMD_DO_SET_MODE, 1, 1);
 
