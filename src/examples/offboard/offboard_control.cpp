@@ -81,7 +81,7 @@ public:
 			publish_trajectory_setpoint();
 
 			// stop the counter after reaching 11
-			if (offboard_setpoint_counter_ < 11) {
+			if (offboard_setpoint_counter_ < 21) {
 				offboard_setpoint_counter_++;
 			}
 		};
