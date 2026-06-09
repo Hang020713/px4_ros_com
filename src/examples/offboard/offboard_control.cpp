@@ -66,9 +66,10 @@ public:
 
 		auto timer_callback = [this]() -> void {
 
-			if (offboard_setpoint_counter_ == 10) {
+			if (offboard_setpoint_counter_ == 20) {
 				// Change to Offboard mode after 10 setpoints
 				this->publish_vehicle_command(VehicleCommand::VEHICLE_CMD_DO_SET_MODE, 1, 6);
+				RCLCPP_INFO(this->get_logger(), "Published the offboard mode after 10 setpoints");
 
 				// Arm the vehicle
 				this->arm();
@@ -132,8 +133,8 @@ void OffboardControl::disarm()
 void OffboardControl::publish_offboard_control_mode()
 {
 	OffboardControlMode msg{};
-	msg.position = true;
-	msg.velocity = false;
+	msg.position = false;
+	msg.velocity = true;
 	msg.acceleration = false;
 	msg.attitude = false;
 	msg.body_rate = false;
