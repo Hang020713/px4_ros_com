@@ -67,7 +67,7 @@ public:
 		auto timer_callback = [this]() -> void {
 			if(offboard_setpoint_counter_ < 20)
 			{	// Switch to manual mode
-				this->switchManual();
+				switchManual();
 			}
 
 			if (offboard_setpoint_counter_ == 20) {
@@ -111,7 +111,7 @@ private:
 	void publish_vehicle_command(uint16_t command, float param1 = 0.0, float param2 = 0.0);
 };
 
-void OffboardControl::switchManual()
+void switchManual()
 {
 	publish_vehicle_command(VehicleCommand::VEHICLE_CMD_DO_SET_MODE, 1, PX4_CUSTOM_MAIN_MODE_MANUAL);
 
