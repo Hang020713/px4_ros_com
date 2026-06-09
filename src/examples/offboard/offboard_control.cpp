@@ -65,11 +65,12 @@ public:
 		offboard_setpoint_counter_ = 0;
 
 		auto timer_callback = [this]() -> void {
+			std::cout << "Current counter:" << offboard_setpoint_counter_ << std::endl;
 
 			if (offboard_setpoint_counter_ == 20) {
 				// Change to Offboard mode after 10 setpoints
 				this->publish_vehicle_command(VehicleCommand::VEHICLE_CMD_DO_SET_MODE, 1, 6);
-				RCLCPP_INFO(this->get_logger(), "Published the offboard mode after 10 setpoints");
+				std::cout << "Starting offboard control node..." << std::endl;
 
 				// Arm the vehicle
 				this->arm();
