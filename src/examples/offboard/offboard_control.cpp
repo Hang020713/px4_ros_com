@@ -67,7 +67,7 @@ public:
 		auto timer_callback = [this]() -> void {
 			if(offboard_setpoint_counter_ < 20)
 			{	// Switch to manual mode
-				this->publish_vehicle_command(VehicleCommand::VEHICLE_CMD_DO_SET_MODE, 1, PX4_CUSTOM_MAIN_MODE_MANUAL);
+				this->publish_vehicle_command(VehicleCommand::VEHICLE_CMD_DO_SET_MODE, 1, 1);
 
 				std::cout << "Set manual mode command send" << std::endl;
 			}
