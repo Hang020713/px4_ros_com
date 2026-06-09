@@ -65,6 +65,11 @@ public:
 		offboard_setpoint_counter_ = 0;
 
 		auto timer_callback = [this]() -> void {
+			if(offboard_setpoint_counter_ < 20)
+			{	// Switch to manual mode
+				this->switchManual();
+			}
+
 			if (offboard_setpoint_counter_ == 20) {
 				// Change to Offboard mode after 10 setpoints
 				this->publish_vehicle_command(VehicleCommand::VEHICLE_CMD_DO_SET_MODE, 1, 6);
@@ -105,6 +110,13 @@ private:
 	void publish_trajectory_setpoint();
 	void publish_vehicle_command(uint16_t command, float param1 = 0.0, float param2 = 0.0);
 };
+
+void OffboardControl::switchManual()
+{
+	publish_vehicle_command(VehicleCommand::VEHICLE_CMD_DO_SET_MODE, 1, PX4_CUSTOM_MAIN_MODE_MANUAL);
+
+	RCLCPP_INFO(this->get_logger(), "Set manual mode command send");
+}
 
 /**
  * @brief Send a command to Arm the vehicle
